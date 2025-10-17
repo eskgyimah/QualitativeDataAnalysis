@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Qualitative Data Analysis - Exam Flashcards & Q&A</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .exam-countdown {
+            background: rgba(255,255,255,0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .countdown-text {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            background: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+            transition: all 0.3s;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .tab:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .tab.active {
+            background: #f39c12;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Flashcard Styles */
+        .flashcard-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .flashcard {
+            perspective: 1000px;
+            height: 300px;
+        }
+
+        .flashcard-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            cursor: pointer;
+        }
+
+        .flashcard.flipped .flashcard-inner {
+            transform: rotateY(180deg);
+        }
+
+        .flashcard-front, .flashcard-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 15px;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        }
+
+        .flashcard-front {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .flashcard-back {
+            background: white;
+            color: #333;
+            transform: rotateY(180deg);
+        }
+
+        .card-category {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(255,255,255,0.3);
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        .card-number {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255,255,255,0.3);
+            padding: 5px 10px;
+            border-radius: 50%;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        .card-content {
+            font-size: 1.2em;
+            line-height: 1.6;
+        }
+
+        .flip-hint {
+            position: absolute;
+            bottom: 10px;
+            font-size: 0.9em;
+            opacity: 0.7;
+        }
+
+        /* Q&A Styles */
+        .qa-container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+
+        .question {
+            background: #f8f9fa;
+            padding: 20px;
+            border-left: 5px solid #667eea;
+            margin-bottom: 15px;
+            border-radius: 5px;
+        }
+
+        .question-number {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .question-text {
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .answer {
+            background: #e8f5e9;
+            padding: 15px;
+            border-left: 5px solid #4caf50;
+            border-radius: 5px;
+            display: none;
+            margin-top: 10px;
+        }
+
+        .answer.show {
+            display: block;
+        }
+
+        .show-answer-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background 0.3s;
+        }
+
+        .show-answer-btn:hover {
+            background: #764ba2;
+        }
+
+        .progress-bar {
+            background: rgba(255,255,255,0.3);
+            height: 30px;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .progress-fill {
+            background: #4caf50;
+            height: 100%;
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .category-filter {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            background: white;
+            border: 2px solid #667eea;
+            color: #667eea;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .filter-btn:hover, .filter-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .study-tips {
+            background: rgba(255,255,255,0.9);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .study-tips h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .study-tips ul {
+            margin-left: 20px;
+        }
+
+        .study-tips li {
+            margin: 8px 0;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📚 Qualitative Data Analysis</h1>
+            <p style="font-size: 1.2em;">Exam Preparation - Flashcards & Q&A</p>
+            <div class="exam-countdown">
+                <div class="countdown-text" id="countdown">⏰ EXAM IN: Loading...</div>
+                <p style="margin-top: 10px;">Study Plan: Review all cards daily + Practice Q&A</p>
+            </div>
+        </header>
+
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('flashcards')">🎴 Flashcards</button>
+            <button class="tab" onclick="showTab('mcq')">✅ Multiple Choice</button>
+            <button class="tab" onclick="showTab('shortanswer')">✍️ Short Answer</button>
+            <button class="tab" onclick="showTab('essay')">📝 Essay Questions</button>
+            <button class="tab" onclick="showTab('tips')">💡 Study Tips</button>
+        </div>
+
+        <!-- Flashcards Tab -->
+        <div id="flashcards" class="tab-content active">
+            <div class="category-filter">
+                <button class="filter-btn active" onclick="filterCards('all')">All Cards</button>
+                <button class="filter-btn" onclick="filterCards('pre-analysis')">Pre-Data Analysis</button>
+                <button class="filter-btn" onclick="filterCards('analysis-levels')">Analysis Levels</button>
+                <button class="filter-btn" onclick="filterCards('techniques')">Analytical Techniques</button>
+            </div>
+
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress" style="width: 0%">0% Reviewed</div>
+            </div>
+
+            <div class="flashcard-container" id="flashcard-container">
+                <!-- Flashcards will be inserted here by JavaScript -->
+            </div>
+        </div>
+
+        <!-- MCQ Tab -->
+        <div id="mcq" class="tab-content">
+            <h2 style="color: white; margin-bottom: 20px;">Multiple Choice Questions</h2>
+            <div id="mcq-container"></div>
+        </div>
+
+        <!-- Short Answer Tab -->
+        <div id="shortanswer" class="tab-content">
+            <h2 style="color: white; margin-bottom: 20px;">Short Answer Questions</h2>
+            <div id="shortanswer-container"></div>
+        </div>
+
+        <!-- Essay Questions Tab -->
+        <div id="essay" class="tab-content">
+            <h2 style="color: white; margin-bottom: 20px;">Essay Questions</h2>
+            <div id="essay-container"></div>
+        </div>
+
+        <!-- Study Tips Tab -->
+        <div id="tips" class="tab-content">
+            <div class="study-tips">
+                <h2>🎯 6-Day Study Plan</h2>
+                <h3>Day 1-2: Pre-Data Analysis</h3>
+                <ul>
+                    <li>Master the 6 stages of pre-data analysis</li>
+                    <li>Practice coding examples</li>
+                    <li>Memorize theme development process</li>
+                </ul>
+
+                <h3>Day 3: Analysis Levels</h3>
+                <ul>
+                    <li>Understand Basic vs Rigorous analysis</li>
+                    <li>Learn the 5 C's framework (Context, Conditions, Covariations, Correlates, Consequences)</li>
+                    <li>Practice applying frameworks to examples</li>
+                </ul>
+
+                <h3>Day 4-5: Analytical Techniques</h3>
+                <ul>
+                    <li>Study CCA, Narrative, Phenomenological, and Ethnographic analysis</li>
+                    <li>Compare and contrast each technique</li>
+                    <li>Memorize key characteristics and applications</li>
+                </ul>
+
+                <h3>Day 6: Review & Practice</h3>
+                <ul>
+                    <li>Review all flashcards</li>
+                    <li>Complete all Q&A sections</li>
+                    <li>Create summary notes</li>
+                    <li>Test yourself without looking at answers</li>
+                </ul>
+
+                <h3>💡 Memory Tips</h3>
+                <ul>
+                    <li><strong>Acronyms:</strong> Use LCRADT for pre-analysis (Listen, Convert, Read, Assign, Develop, Select)</li>
+                    <li><strong>5 C's:</strong> Context, Conditions, Covariations, Correlates, Consequences</li>
+                    <li><strong>4 Techniques:</strong> CCA = Comparison, Narrative = Story, Phenomenological = Experience, Ethnographic = Culture</li>
+                    <li><strong>Practice:</strong> Teach concepts to someone else to solidify understanding</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Flashcard data
+        const flashcards = [
+            // Pre-Data Analysis Category
+            {
+                category: 'pre-analysis',
+                front: 'What are the 6 stages of Pre-Data Analysis?',
+                back: '1. Listening to recordings\n2. Converting to transcriptions\n3. Reading transcriptions\n4. Assigning codes\n5. Developing themes\n6. Selecting narratives'
+            },
+            {
+                category: 'pre-analysis',
+                front: 'What types of codes can be assigned in qualitative analysis?',
+                back: '• Numbers (1,2,3)\n• Alphabets (a,b,c)\n• Roman numerals (i,ii,iii)\n• Symbols (%,&)\n• Colors (red, yellow, orange)'
+            },
+            {
+                category: 'pre-analysis',
+                front: 'What is a Legend in coding?',
+                back: 'A key that defines what each code represents.\nExample:\n1 = Emotional expressions\n2 = Adaptations\n3 = Effects'
+            },
+            {
+                category: 'pre-analysis',
+                front: 'What is Conceptual Consistency?',
+                back: 'The alignment between:\n• Research Objective (RO)\n• Research Question (RQ)\n• Research Theme (RT)\n\nThey must all address the same core concept.'
+            },
+            {
+                category: 'pre-analysis',
+                front: 'Characteristics of good narrative selection?',
+                back: 'Should be:\n• SHORT\n• CONCISE\n• SUCCINCT\n\nSupports theme essence effectively'
+            },
+
+            // Analysis Levels Category
+            {
+                category: 'analysis-levels',
+                front: 'What are the two levels of Qualitative Data Analysis?',
+                back: '1. BASIC LEVEL\n2. RIGOROUS LEVEL'
+            },
+            {
+                category: 'analysis-levels',
+                front: 'What are the 3 elements of Basic Qualitative Analysis?',
+                back: '1. Presentation using narratives (quotations)\n2. Interpretation & making inferences\n3. Interspersing findings with literature'
+            },
+            {
+                category: 'analysis-levels',
+                front: 'What is "Interspersing findings with literature"?',
+                back: 'Identifying:\n• Points of convergence\n• Corroborations\n• Divergence\n• Contradictions\n• Finding add-ups'
+            },
+            {
+                category: 'analysis-levels',
+                front: 'What are the 5 C\'s of Rigorous Analysis?',
+                back: '1. CONTEXT: Within which context(s)?\n2. CONDITIONS: What conditions are responsible?\n3. COVARIATIONS: What covariations exist?\n4. CORRELATES (CAUSES): What are the causes?\n5. CONSEQUENCES: What are the consequences?'
+            },
+            {
+                category: 'analysis-levels',
+                front: 'What are Key Questions in Basic Analysis?',
+                back: 'a. Give a hint of the issue discussed\nOR\nb. Indicate the question posed by interviewer\n\nShows motivation/relevance for asking'
+            },
+
+            // Analytical Techniques Category
+            {
+                category: 'techniques',
+                front: 'What is Constant Comparative Analysis (CCA)?',
+                back: 'A CYCLICAL way of comparing NEW data with OLD coded ones.\n\nAim: Develop conceptual categories describing common patterns about basic social processes and human phenomena.'
+            },
+            {
+                category: 'techniques',
+                front: 'When is CCA useful?',
+                back: 'When NEW data comes with NEW codes.\n\nNew codes are compared with initial codes in a back-and-forth manner.'
+            },
+            {
+                category: 'techniques',
+                front: 'What is Narrative Analysis?',
+                back: 'An analytical technique used to capture how people interpret meanings of life experiences.\n\nProvides insights about people, places, and events in present times.'
+            },
+            {
+                category: 'techniques',
+                front: 'What are the 4 key elements of Narrative Analysis?',
+                back: 'a. The SETTING\nb. The CHARACTER\nc. The PLOT\nd. The NARRATIVE CONSTRUCTION'
+            },
+            {
+                category: 'techniques',
+                front: 'What is Phenomenological Analysis?',
+                back: 'Provides understanding of how individuals EXPERIENCE a phenomenon.\n\nCharacterized by REFLEXIVE exercise where meanings are MADE rather than FOUND.'
+            },
+            {
+                category: 'techniques',
+                front: 'What shapes Phenomenological Analysis?',
+                back: 'Researcher\'s backgrounds:\n• Personal\n• Professional\n• Intellectual\n• Interpersonal\n• Political\n• Institutional'
+            },
+            {
+                category: 'techniques',
+                front: 'What is the criticism of Phenomenological Analysis?',
+                back: 'May generate excesses:\n• Collecting trivial data\n• Unintentionally producing autobiographies\n• Reaping same cultural prejudices prominent at a time/place'
+            },
+            {
+                category: 'techniques',
+                front: 'What does Ethnographic Analysis provide?',
+                back: 'HOLISTIC description of:\n• Shared culture, attitudes, values, norms\n• Practices, patterns of interaction\n• Perspectives, thoughts, emotions\n• Language of social/cultural group'
+            },
+            {
+                category: 'techniques',
+                front: 'What are the 5 key aspects interpreted in Ethnographic Analysis?',
+                back: '1. PROCESSES of behaviour\n2. PRODUCTS/OUTCOMES of behaviour\n3. PHILOSOPHIES surrounding behaviour\n4. MOTIVATIONS (economic, social, psychological)\n5. CULTURAL FOUNDATIONS of behaviour'
+            },
+            {
+                category: 'techniques',
+                front: 'What are the 4 stages of Ethnographic Analysis?',
+                back: '1. Detecting and interpreting thematic categorizations\n2. Searching for inconsistencies and contradictions\n3. Generating conclusions about events\n4. Providing explanations to occurrences'
+            },
+            {
+                category: 'techniques',
+                front: 'Compare the 4 main analytical techniques',
+                back: 'CCA: Compares new/old data cyclically\nNarrative: Analyzes life experiences as stories\nPhenomenological: Understands individual experiences\nEthnographic: Describes shared cultural patterns'
+            }
+        ];
+
+        // MCQ Questions
+        const mcqQuestions = [
+            {
+                question: 'Which is NOT a stage in pre-data analysis?',
+                options: [
+                    'Listening to recordings',
+                    'Converting to transcriptions',
+                    'Statistical testing',
+                    'Assigning codes'
+                ],
+                correct: 2,
+                explanation: 'Statistical testing is not part of qualitative pre-data analysis. The 6 stages are: Listening, Converting, Reading, Assigning codes, Developing themes, and Selecting narratives.'
+            },
+            {
+                question: 'What is the main aim of Constant Comparative Analysis (CCA)?',
+                options: [
+                    'To count frequencies of codes',
+                    'To develop conceptual categories describing common patterns',
+                    'To create statistical models',
+                    'To validate quantitative data'
+                ],
+                correct: 1,
+                explanation: 'CCA aims to develop conceptual categories that describe common patterns about basic social processes and human phenomena through cyclical comparison.'
+            },
+            {
+                question: 'The 4 elements of Narrative Analysis are:',
+                options: [
+                    'Introduction, Body, Conclusion, References',
+                    'Setting, Character, Plot, Narrative Construction',
+                    'Theme, Code, Category, Pattern',
+                    'Context, Content, Criticism, Conclusion'
+                ],
+                correct: 1,
+                explanation: 'Narrative Analysis captures four key elements: Setting, Character, Plot, and Narrative Construction.'
+            },
+            {
+                question: 'What does "reflexive exercise" mean in Phenomenological Analysis?',
+                options: [
+                    'Physical reflection exercises',
+                    'Meanings are made rather than found',
+                    'Automatic data coding',
+                    'Statistical reflection'
+                ],
+                correct: 1,
+                explanation: 'Phenomenological analysis is characterized by a reflexive exercise through which meanings are MADE rather than FOUND.'
+            },
+            {
+                question: 'Which is NOT one of the 5 C\'s in Rigorous Analysis?',
+                options: [
+                    'Context',
+                    'Conditions',
+                    'Categories',
+                    'Consequences'
+                ],
+                correct: 2,
+                explanation: 'The 5 C\'s are: Context, Conditions, Covariations, Correlates (Causes), and Consequences. Categories is not one of them.'
+            },
+            {
+                question: 'Ethnographic Analysis is characterized by:',
+                options: [
+                    'Quantitative measurements',
+                    'Uncovering variations in how groups understand and enact behaviour',
+                    'Random sampling only',
+                    'Experimental design'
+                ],
+                correct: 1,
+                explanation: 'Ethnographic method is characterized by uncovering and recording variations of how different social and cultural groups understand and enact particular behaviour.'
+            },
+            {
+                question: 'What should narrative selections be?',
+                options: [
+                    'Long and detailed',
+                    'Statistical and numerical',
+                    'Short, concise, and succinct',
+                    'Theoretical only'
+                ],
+                correct: 2,
+                explanation: 'Narrative selections should be SHORT, CONCISE, and SUCCINCT to effectively support theme essence.'
+            },
+            {
+                question: 'Conceptual consistency refers to alignment between:',
+                options: [
+                    'Different researchers',
+                    'Research Objective, Research Question, and Research Theme',
+                    'Qualitative and quantitative data',
+                    'Theory and practice'
+                ],
+                correct: 1,
+                explanation: 'Conceptual consistency means alignment between Research Objective (RO), Research Question (RQ), and Research Theme (RT).'
+            }
+        ];
+
+        // Short Answer Questions
+        const shortAnswerQuestions = [
+            {
+                question: 'List and briefly explain the 6 stages of pre-data analysis.',
+                answer: '1. Listening to recordings - Enhance familiarity with data\n2. Converting recordings into transcriptions - Transform audio to text\n3. Reading through transcriptions - Initial data familiarization\n4. Assigning codes - Use numbers, alphabets, symbols, or colors\n5. Developing themes - Create meaningful categories from codes\n6. Selecting narratives - Choose short, concise quotes to support themes'
+            },
+            {
+                question: 'Explain what a "Legend" is in qualitative coding with an example.',
+                answer: 'A legend is a key that defines what each code represents in the analysis.\n\nExample Legend:\n1 = Emotional expressions\n2 = Adaptations\n3 = Effects\n\nThis helps maintain consistency and clarity in coding throughout the analysis.'
+            },
+            {
+                question: 'What are the 3 elements of Basic Qualitative Analysis?',
+                answer: '1. Presentation of theme content using narratives (quotations) - Direct quotes from participants\n2. Interpretation of narratives and making inferences to produce findings - Analyze what quotes mean\n3. Interspersing findings with literature - Compare findings with existing research, identifying convergence, corroboration, divergence, contradictions, and add-ups'
+            },
+            {
+                question: 'Explain the 5 C\'s framework used in Rigorous Qualitative Analysis.',
+                answer: '1. CONTEXT: Within which contexts (macro, structural, systems, institutional) do we understand the finding?\n2. CONDITIONS: What conditions are responsible for the finding in its current form?\n3. COVARIATIONS: What covariations are associated with the finding?\n4. CORRELATES (CAUSES): What are the causes of the finding?\n5. CONSEQUENCES: What are the consequences of the findings?'
+            },
+            {
+                question: 'Compare and contrast CCA and Narrative Analysis.',
+                answer: 'SIMILARITIES:\n- Both are qualitative techniques\n- Both interpret meanings from data\n\nDIFFERENCES:\nCCA:\n- Cyclical comparison of new and old data\n- Focuses on developing conceptual categories\n- Useful when new data brings new codes\n- Back-and-forth comparison process\n\nNarrative Analysis:\n- Focuses on life experiences as stories\n- Captures setting, character, plot, construction\n- Provides insights about people, places, events\n- Linear narrative structure'
+            },
+            {
+                question: 'What is Phenomenological Analysis and what shapes it?',
+                answer: 'Phenomenological Analysis provides understanding of how individuals EXPERIENCE a phenomenon.\n\nShaped by researcher\'s:\n• Personal characteristics\n• Professional background\n• Intellectual perspectives\n• Interpersonal skills\n• Political views\n• Institutional contexts\n\nIt is a reflexive exercise where meanings are MADE rather than FOUND, generated from social, political, cultural, and experiential contexts of respondents.'
+            },
+            {
+                question: 'List the 5 key aspects of behavior interpreted in Ethnographic Analysis.',
+                answer: '1. PROCESSES - How the behaviour takes place\n2. PRODUCTS/OUTCOMES - Results of the behaviour\n3. PHILOSOPHIES - Beliefs surrounding the behaviour\n4. MOTIVATIONS - Economic, social, or psychological reasons\n5. CULTURAL FOUNDATIONS - Why individuals/groups behave the way they do based on culture'
+            },
+            {
+                question: 'What is Conceptual Consistency and why is it important?',
+                answer: 'Conceptual Consistency is the alignment between:\n• Research Objective (RO)\n• Research Question (RQ)\n• Research Theme (RT)\n\nImportance:\n- Ensures coherence throughout the research\n- Maintains focus on the core concept\n- Strengthens validity of findings\n- Helps readers follow the logical flow\n- Prevents scope creep or confusion'
+            }
+        ];
+
+        // Essay Questions
+        const essayQuestions = [
+            {
+                question: 'Discuss the difference between Basic and Rigorous Qualitative Data Analysis, providing examples of when each would be appropriate.',
+                answer: 'BASIC LEVEL ANALYSIS:\n\nCharacteristics:\n1. Presentation using narratives/quotations\n2. Interpretation and making inferences\n3. Interspersing findings with literature\n\nAppropriate when:\n- Exploratory research\n- Limited time/resources\n- Straightforward research questions\n- Descriptive studies\n\nExample: A study describing emotional responses to price increases would use narratives to show how people felt, interpret these feelings, and compare with existing emotion literature.\n\nRIGOROUS LEVEL ANALYSIS:\n\nCharacteristics:\n- Uses the 5 C\'s framework (Context, Conditions, Covariations, Correlates, Consequences)\n- Deeper analytical questioning\n- Multiple levels of interpretation\n- Structural and systemic analysis\n\nAppropriate when:\n- Complex phenomena\n- Theory development\n- Policy implications needed\n- Doctoral-level research\n\nExample: A study on behavioral adaptations to price increases would examine: the economic context (macro), conditions causing adaptations (poverty), covariations (with income levels), causes (inflation), and consequences (on wellbeing).\n\nThe choice depends on research goals, scope, and depth required.'
+            },
+            {
+                question: 'Critically evaluate Phenomenological Analysis, including its strengths, weaknesses, and appropriate applications.',
+                answer: 'DEFINITION:\nPhenomenological analysis provides understanding of how individuals EXPERIENCE a phenomenon through reflexive exercise where meanings are MADE rather than FOUND.\n\nSTRENGTHS:\n1. Rich, detailed understanding of lived experiences\n2. Captures subjective meanings and interpretations\n3. Acknowledges researcher\'s role and biases\n4. Contextually grounded in participants\' experiences\n5. Generates meanings from social, political, cultural contexts\n\nWEAKNESSES (Criticisms):\n1. May collect trivial data\n2. Risk of unintentionally producing autobiographies\n3. May reap cultural prejudices of the time/place\n4. Highly influenced by researcher\'s background (personal, professional, intellectual, interpersonal, political, institutional)\n5. Difficult to generalize findings\n6. Time-consuming and resource-intensive\n\nAPPROPRIATE APPLICATIONS:\n- Understanding patient experiences of illness\n- Exploring meanings of cultural practices\n- Investigating traumatic experiences\n- Studying identity formation\n- Examining spiritual/religious experiences\n\nMITIGATING WEAKNESSES:\n- Clear reflexive statements\n- Peer debriefing\n- Member checking\n- Transparent methodology\n- Focus on substantive issues\n\nConclusion: Phenomenological analysis is powerful for understanding lived experiences but requires careful application to avoid excess reflexivity and maintain focus on research questions.'
+            },
+            {
+                question: 'Compare and contrast the four main qualitative data analytical techniques: CCA, Narrative Analysis, Phenomenological Analysis, and Ethnographic Analysis.',
+                answer: 'CONSTANT COMPARATIVE ANALYSIS (CCA):\nFocus: Comparing new data with old coded data\nProcess: Cyclical, back-and-forth comparison\nAim: Develop conceptual categories\nBest for: Identifying patterns, theory development\nKey feature: Useful when new data brings new codes\n\nNARRATIVE ANALYSIS:\nFocus: How people interpret life experiences\nProcess: Analyzing story elements\nAim: Capture meanings through storytelling\nBest for: Personal experiences, life histories\nKey feature: 4 elements (Setting, Character, Plot, Construction)\n\nPHENOMENOLOGICAL ANALYSIS:\nFocus: Understanding individual experiences\nProcess: Reflexive meaning-making\nAim: Describe lived experiences\nBest for: Subjective experiences, consciousness\nKey feature: Meanings are MADE not FOUND\n\nETHNOGRAPHIC ANALYSIS:\nFocus: Shared cultural patterns\nProcess: Holistic description, 4 stages\nAim: Describe group culture and behavior\nBest for: Cultural groups, social practices\nKey feature: 5 aspects (Processes, Products, Philosophies, Motivations, Cultural foundations)\n\nSIMILARITIES:\n- All are qualitative approaches\n- All interpret meanings\n- All are iterative\n- All require researcher involvement\n\nDIFFERENCES:\n- Unit of analysis: CCA (concepts), Narrative (stories), Phenomenological (experiences), Ethnographic (culture)\n- Focus: CCA (patterns), Narrative (meaning), Phenomenological (consciousness), Ethnographic (behavior)\n- Scope: Individual (Narrative, Phenomenological) vs. Group (CCA, Ethnographic)\n\nCHOOSING THE RIGHT TECHNIQUE:\n- Use CCA for: Developing grounded theory\n- Use Narrative for: Life stories, personal journeys\n- Use Phenomenological for: Lived experiences, consciousness\n- Use Ethnographic for: Cultural practices, group behavior\n\nAll techniques can complement each other in mixed-method qualitative studies.'
+            },
+            {
+                question: 'Design a complete qualitative research analysis plan for studying "University students\' experiences of online learning during COVID-19". Include all stages from pre-analysis to final interpretation.',
+                answer: 'RESEARCH DESIGN:\nObjective: Understand students\' experiences of online learning during COVID-19\nQuestion: How did students experience online learning during the pandemic?\nApproach: Phenomenological Analysis (focus on lived experiences)\n\nPRE-DATA ANALYSIS STAGES:\n\n1. LISTENING (Week 1):\n- Listen to all interview recordings 2-3 times\n- Note initial impressions\n- Identify interesting patterns\n\n2. CONVERTING (Week 1-2):\n- Transcribe all interviews verbatim\n- Include pauses, emotions, non-verbal cues\n- Ensure accuracy\n\n3. READING (Week 2):\n- Read all transcriptions thoroughly\n- Make marginal notes\n- Begin preliminary categorization\n\n4. ASSIGNING CODES (Week 3):\nLegend:\n1 = Technical challenges\n2 = Social isolation\n3 = Learning adaptations\n4 = Positive outcomes\n5 = Negative outcomes\n6 = Coping strategies\n\n5. DEVELOPING THEMES (Week 4):\n- Theme 1: "Digital Divide Experiences"\n- Theme 2: "Social Connection Loss"\n- Theme 3: "Learning Strategy Adaptations"\n- Theme 4: "Unexpected Benefits"\n- Theme 5: "Emotional Rollercoaster"\n\nEnsure Conceptual Consistency: All themes address the RO, RQ\n\n6. SELECTING NARRATIVES (Week 4):\n- Choose SHORT, CONCISE, SUCCINCT quotes\n- Ensure quotes clearly illustrate themes\n\nDATA ANALYSIS:\n\nBASIC LEVEL:\n1. Presentation:\n   "Students described feelings of isolation: \'I felt like I was learning in a vacuum, no one to share ideas with\' (Student A)"\n\n2. Interpretation:\n   This reveals how online learning disrupted social learning aspects\n\n3. Literature Integration:\n   This finding converges with Vygotsky\'s social learning theory but contradicts claims that technology enhances connection\n\nRIGOROUS LEVEL - 5 C\'s:\n\n1. CONTEXT:\n   - Macro: Global pandemic, government lockdowns\n   - Structural: University policies, digital infrastructure\n   - Institutional: Course delivery systems\n\n2. CONDITIONS:\n   - Internet access inequality\n   - Home learning environment\n   - Lecturer digital competence\n   - Platform availability\n\n3. COVARIATIONS:\n   - Socioeconomic status ↔ Technology access\n   - Age ↔ Adaptation ability\n   - Subject type ↔ Online suitability\n\n4. CORRELATES (CAUSES):\n   - Pandemic forcing rapid transition\n   - Lack of preparation time\n   - Digital divide\n   - Changed social dynamics\n\n5. CONSEQUENCES:\n   - Short-term: Learning disruption, stress\n   - Long-term: Digital literacy improvement, flexible learning acceptance\n\nETHNOGRAPHIC ELEMENTS:\nAnalyze 5 aspects:\n1. Processes: How students adapted their study routines\n2. Products: New learning materials created\n3. Philosophies: Beliefs about online vs. face-to-face\n4. Motivations: Why students engaged/disengaged\n5. Cultural foundations: University culture shift\n\nPHENOMENOLOGICAL FOCUS:\n- Researcher reflexivity statement\n- Acknowledge own pandemic experience\n- Note how personal context shapes interpretation\n- Focus on LIVED EXPERIENCE essence\n\nFINAL INTERPRETATION:\n1. Detect themes across all data\n2. Search for contradictions (some thrived, others struggled)\n3. Generate conclusions about pandemic learning\n4. Explain why experiences varied\n\nVALIDATION:\n- Member checking with participants\n- Peer debriefing\n- Audit trail\n- Thick description\n\nWRITING UP:\n- Introduction: Context and significance\n- Methodology: Phenomenological approach justified\n- Findings: Theme-by-theme with narratives\n- Discussion: 5 C\'s analysis, literature integration\n- Conclusion: Implications for future online learning\n\nThis comprehensive plan ensures rigorous, valid, and meaningful qualitative analysis of students\' online learning experiences.'
+            }
+        ];
+
+        // Initialize
+        let reviewedCards = 0;
+        let currentFilter = 'all';
+
+        function initFlashcards() {
+            const container = document.getElementById('flashcard-container');
+            container.innerHTML = '';
+
+            flashcards.forEach((card, index) => {
+                if (currentFilter !== 'all' && card.category !== currentFilter) {
+                    return;
+                }
+
+                const cardDiv = document.createElement('div');
+                cardDiv.className = 'flashcard';
+                cardDiv.innerHTML = `
+                    <div class="flashcard-inner">
+                        <div class="flashcard-front">
+                            <span class="card-category">${card.category}</span>
+                            <span class="card-number">${index + 1}</span>
+                            <div class="card-content">${card.front}</div>
+                            <div class="flip-hint">👆 Click to flip</div>
+                        </div>
+                        <div class="flashcard-back">
+                            <span class="card-category">${card.category}</span>
+                            <span class="card-number">${index + 1}</span>
+                            <div class="card-content">${card.back.replace(/\n/g, '<br>')}</div>
+                            <div class="flip-hint">👆 Click to flip back</div>
+                        </div>
+                    </div>
+                `;
+
+                cardDiv.addEventListener('click', function() {
+                    this.classList.toggle('flipped');
+                    if (this.classList.contains('flipped') && !this.dataset.reviewed) {
+                        this.dataset.reviewed = 'true';
+                        reviewedCards++;
+                        updateProgress();
+                    }
+                });
+
+                container.appendChild(cardDiv);
+            });
+        }
+
+        function initMCQ() {
+            const container = document.getElementById('mcq-container');
+            container.innerHTML = '';
+
+            mcqQuestions.forEach((q, index) => {
+                const qaDiv = document.createElement('div');
+                qaDiv.className = 'qa-container';
+                qaDiv.innerHTML = `
+                    <div class="question-number">Question ${index + 1}</div>
+                    <div class="question-text">${q.question}</div>
+                    <div style="margin: 15px 0;">
+                        ${q.options.map((opt, i) => `
+                            <div style="margin: 10px 0;">
+                                <label style="cursor: pointer; display: block; padding: 10px; background: #f8f9fa; border-radius: 5px;">
+                                    <input type="radio" name="mcq${index}" value="${i}" onchange="checkMCQ(${index}, ${i}, ${q.correct})">
+                                    ${opt}
+                                </label>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div id="mcq-feedback-${index}" style="display: none; margin-top: 10px;"></div>
+                `;
+                container.appendChild(qaDiv);
+            });
+        }
+
+        function checkMCQ(qIndex, selected, correct) {
+            const feedback = document.getElementById(`mcq-feedback-${qIndex}`);
+            const explanation = mcqQuestions[qIndex].explanation;
+
+            if (selected === correct) {
+                feedback.innerHTML = `<div class="answer show">✅ Correct! ${explanation}</div>`;
+            } else {
+                feedback.innerHTML = `<div style="background: #ffebee; padding: 15px; border-left: 5px solid #f44336; border-radius: 5px;">❌ Incorrect. ${explanation}</div>`;
+            }
+            feedback.style.display = 'block';
+        }
+
+        function initShortAnswer() {
+            const container = document.getElementById('shortanswer-container');
+            container.innerHTML = '';
+
+            shortAnswerQuestions.forEach((q, index) => {
+                const qaDiv = document.createElement('div');
+                qaDiv.className = 'qa-container';
+                qaDiv.innerHTML = `
+                    <div class="question-number">Question ${index + 1}</div>
+                    <div class="question-text">${q.question}</div>
+                    <button class="show-answer-btn" onclick="toggleAnswer('sa-${index}')">Show Answer</button>
+                    <div id="sa-${index}" class="answer">
+                        ${q.answer.replace(/\n/g, '<br>')}
+                    </div>
+                `;
+                container.appendChild(qaDiv);
+            });
+        }
+
+        function initEssay() {
+            const container = document.getElementById('essay-container');
+            container.innerHTML = '';
+
+            essayQuestions.forEach((q, index) => {
+                const qaDiv = document.createElement('div');
+                qaDiv.className = 'qa-container';
+                qaDiv.innerHTML = `
+                    <div class="question-number">Essay Question ${index + 1}</div>
+                    <div class="question-text">${q.question}</div>
+                    <button class="show-answer-btn" onclick="toggleAnswer('essay-${index}')">Show Model Answer</button>
+                    <div id="essay-${index}" class="answer">
+                        <strong>Model Answer:</strong><br><br>
+                        ${q.answer.replace(/\n/g, '<br>')}
+                    </div>
+                `;
+                container.appendChild(qaDiv);
+            });
+        }
+
+        function toggleAnswer(id) {
+            const answer = document.getElementById(id);
+            answer.classList.toggle('show');
+        }
+
+        function updateProgress() {
+            const percentage = Math.round((reviewedCards / flashcards.length) * 100);
+            const progressBar = document.getElementById('progress');
+            progressBar.style.width = percentage + '%';
+            progressBar.textContent = percentage + '% Reviewed';
+        }
+
+        function filterCards(category) {
+            currentFilter = category;
+            reviewedCards = 0;
+            updateProgress();
+            initFlashcards();
+
+            // Update active filter button
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Remove active from all tab buttons
+            document.querySelectorAll('.tab').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Countdown Timer
+        function updateCountdown() {
+            const examDate = new Date('2025-10-21T15:00:00');
+            const now = new Date();
+            const diff = examDate - now;
+
+            if (diff <= 0) {
+                document.getElementById('countdown').innerHTML = '⏰ EXAM TIME!';
+                return;
+            }
+
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+            document.getElementById('countdown').innerHTML =
+                `⏰ EXAM IN: ${days}d ${hours}h ${minutes}m ${seconds}s`;
+        }
+
+        // Initialize on load
+        window.onload = function() {
+            initFlashcards();
+            initMCQ();
+            initShortAnswer();
+            initEssay();
+            updateCountdown();
+            setInterval(updateCountdown, 1000); // Update every second
+        };
+    </script>
+</body>
+</html>
