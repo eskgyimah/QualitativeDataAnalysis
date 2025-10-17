@@ -19,13 +19,12 @@
   - 6-day study plan
 
 ### Git Tools
-- **🦇_GIT_MANAGER.bat** - All-in-one Git operations menu
+- **Run Flash.bat** - All-in-one flashcard manager with Git operations
   - Initialize repository
   - View status
-  - Push changes
+  - Push changes (with optional commit message)
   - View commits
   - Open flashcards
-- **🦇_PUSH.bat** - Quick push to GitHub
 
 ---
 
@@ -60,7 +59,7 @@ Double-click: QUALITATIVE_DATA_ANALYSIS_FLASHCARDS.html
 
 ### Publishing to GitHub (First Time)
 ```cmd
-1. Double-click: 🦇_GIT_MANAGER.bat
+1. Double-click: Run Flash.bat
 2. Select [1] Initialize Git Repository
 3. Follow the on-screen instructions to create GitHub repo
 4. Enable GitHub Pages in repository settings
@@ -69,9 +68,10 @@ Double-click: QUALITATIVE_DATA_ANALYSIS_FLASHCARDS.html
 ### Updating Study Materials
 ```cmd
 1. Make changes to flashcards HTML
-2. Double-click: 🦇_PUSH.bat
-3. Enter commit message
-4. Wait 1-2 minutes for GitHub Pages to update
+2. Double-click: Run Flash.bat
+3. Select [3] Push
+4. Enter commit message (or press Enter for default)
+5. Wait 1-2 minutes for GitHub Pages to update
 ```
 
 ---

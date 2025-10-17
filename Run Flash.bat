@@ -1,20 +1,20 @@
 @echo off
 REM ============================================
-REM  Git Manager - Qualitative Data Analysis
+REM  Run Flash - Qualitative Data Analysis
 REM ============================================
-REM  All-in-one Git operations manager
+REM  Flashcard manager with Git operations
 REM  Author: Edward Solomon Kweku Gyimah
 REM ============================================
 
 :MENU
 cls
 color 0E
-title Git Manager - Qualitative Data Analysis
+title Run Flash - Qualitative Data Analysis
 
 echo.
 echo ========================================================
 echo.
-echo     GIT MANAGER - QUALITATIVE DATA ANALYSIS
+echo     RUN FLASH - QUALITATIVE DATA ANALYSIS
 echo.
 echo ========================================================
 echo.
@@ -156,7 +156,7 @@ echo Files changed:
 git status --short
 echo.
 
-set /p commit_msg="Enter commit message: "
+set /p commit_msg="Enter commit message (optional, press Enter for default): "
 if "%commit_msg%"=="" set commit_msg=Update exam study materials
 
 echo.
@@ -219,7 +219,7 @@ cls
 echo.
 echo ========================================================
 echo.
-echo   Thank you for using Git Manager!
+echo   Thank you for using Run Flash!
 echo.
 echo   Student: Edward Solomon Kweku Gyimah (SE/DAT/24/0007)
 echo   Exam: October 21, 2025 at 3:00 PM
